@@ -1,0 +1,20 @@
+<h1>Game #{toHuman gameId}
+
+<div .subtitle>
+  Between #{maybePlayerName maybePlayer1} and #{maybePlayerName maybePlayer2} (
+  $if ticTacToeGameNextPlayer game == PlayerX
+    #{maybePlayerName maybePlayer1}
+  $else
+    #{maybePlayerName maybePlayer2}
+  \ to play)
+
+<div .board>
+  <table>
+    $forall row <- gameBoard
+      <tr>
+        $forall cell <- row
+          <td>
+            $maybe space <- cell
+              #{ticTacToeSpaceValueHtml space}
+            $nothing
+              _
