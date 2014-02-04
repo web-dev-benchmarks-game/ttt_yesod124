@@ -5,3 +5,5 @@
 /robots.txt RobotsR GET
 
 / HomeR GET POST
+/tictactoe TicTacToeListR GET
+/tictactoe/#TicTacToeGameId TicTacToeGameR GET POST

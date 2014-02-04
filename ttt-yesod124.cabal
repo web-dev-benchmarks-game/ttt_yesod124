@@ -20,6 +20,8 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      Handler.Home
+                     TicTacToe
+                     Handler.TicTacToeGame
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -70,6 +72,7 @@ library
                  , monad-logger                  >= 0.3
                  , fast-logger                   >= 2.0
                  , wai-logger                    >= 2.0
+                 , time     >= 1.4
 
 executable         ttt-yesod124
     if flag(library-only)

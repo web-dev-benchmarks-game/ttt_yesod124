@@ -36,4 +36,4 @@ postHomeR = do
 sampleForm :: Form (FileInfo, Text)
 sampleForm = renderDivs $ (,)
     <$> fileAFormReq "Choose a file"
-    <*> areq textField "What's on the file?" Nothing
+    <*> areq textField "What's going on?" (Just "Chillin")
