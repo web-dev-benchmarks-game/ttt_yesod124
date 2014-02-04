@@ -2,6 +2,7 @@
 module Handler.TicTacToeGame where
 
 import Import
+import Data.Text as T
 
 getTicTacToeListR :: Handler Html
 getTicTacToeListR = do
@@ -17,5 +18,5 @@ postTicTacToeGameR gameId = do
 getTicTacToeGameR :: TicTacToeGameId -> Handler Html
 getTicTacToeGameR gameId = do
     defaultLayout $ do
-        setTitle $ toHtml ("TicTacToe - Game " ++ show (unKey gameId))
+        setTitle $ toHtml $ (T.append . T.pack) "TicTacToe - Game " $ toPathPiece (unKey gameId)
         [whamlet|<h1>Hi|]
