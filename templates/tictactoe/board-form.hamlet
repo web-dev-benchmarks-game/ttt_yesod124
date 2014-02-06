@@ -1,0 +1,10 @@
+<table>
+  $forall row <- gameBoard
+    <tr>
+      $forall cell <- row
+        <td>
+          $case cell
+            $of Right space
+              #{ticTacToeSpaceValueHtml space}
+            $of Left tuple
+              <input id=#{idAttr} name=#{nameAttr} *{otherAttrs} type="radio" value="#{fst tuple},#{snd tuple}"/>

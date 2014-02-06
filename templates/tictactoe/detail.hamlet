@@ -9,12 +9,19 @@
   \ to play)
 
 <div .board>
-  <table>
-    $forall row <- gameBoard
-      <tr>
-        $forall cell <- row
-          <td>
-            $maybe space <- cell
-              #{ticTacToeSpaceValueHtml space}
-            $nothing
-              _
+  $if Just nextPlayerId == viewer
+    <form method="post" action=@{TicTacToeGameR gameId}>
+      ^{boardWidget}
+      <input type="submit">
+  $else
+    $# This kind of sucks -- wish there was a better way to fuse the board widget with non-widget uses.
+    <table>
+      $forall row <- gameBoard
+        <tr>
+          $forall cell <- row
+            <td>
+              $case cell
+                $of Right space
+                  #{ticTacToeSpaceValueHtml space}
+                $of Left tuple
+                  _

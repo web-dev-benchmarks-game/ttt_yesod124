@@ -73,6 +73,7 @@ library
                  , fast-logger                   >= 2.0
                  , wai-logger                    >= 2.0
                  , time     >= 1.4
+                 , split    >= 0.2
 
 executable         ttt-yesod124
     if flag(library-only)
