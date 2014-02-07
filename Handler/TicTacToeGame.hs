@@ -23,16 +23,9 @@ getTicTacToeListR = do
         setTitle "TicTacToe - Game list"
         [whamlet|<h1>Hi|]
 
-postTicTacToeGameR :: TicTacToeGameId -> Handler Html
-postTicTacToeGameR gameId = do
-    defaultLayout $ do
-        titleForGameId gameId
-        [whamlet|<h1>You made a move:|]
-    -- some stuff
-    -- redirect (TicTacToeGameR gameId)
+type TicTacToeGameBoard = [[Either (Int, Int) TicTacToeSpace]]
 
-
-boardField :: [[Either (Int, Int) TicTacToeSpace]] -> Field Handler (Int, Int)
+boardField :: TicTacToeGameBoard -> Field Handler (Int, Int)
 boardField gameBoard = Field
     { fieldParse = \rawVals _fileVals ->
         case rawVals of
@@ -51,15 +44,48 @@ boardField gameBoard = Field
     , fieldEnctype = UrlEncoded
     }
 
+
+-- Ugh, what the hell is the type of boardWidget??  There's probably a
+-- better way to refactor this using template haskell or
+-- something. Define message as a Maybe Text or something and splice
+-- it. I dunno.
+-- renderTicTacToeGame :: Entity TicTacToeGame -> TicTacToeGameBoard -> FormRender Handler (Int, Int) -> Text -> Handler Html
+renderTicTacToeGame gameE gameBoard boardWidget message = do
+    let gameId = entityKey gameE
+    let game = entityVal gameE
+    viewer <- maybeAuthId
+    maybePlayer1 <- runDB $ get (ticTacToeGamePlayer1 game)
+    maybePlayer2 <- runDB $ get (ticTacToeGamePlayer2 game)
+    let nextPlayerId = ticTacToeGameNextPlayerId game
+    defaultLayout $ do
+        titleForGameId gameId
+        $(widgetFile "tictactoe/detail")
+
+
+postTicTacToeGameR :: TicTacToeGameId -> Handler Html
+postTicTacToeGameR gameId = do
+    game <- runDB $ get404 gameId
+    let gameE = Entity gameId game
+    gameBoard <- runDB $ board gameId
+    ((res, boardWidget), enctype) <- runFormPost $ renderDivs $ areq (boardField gameBoard) "Make a move!" Nothing
+    viewer <- maybeAuthId
+    let nextPlayerId = ticTacToeGameNextPlayerId game
+    case viewer of
+      Just viewerId | viewerId == nextPlayerId -> case res of
+        FormSuccess (x, y) -> do
+          runDB $ insert $ TicTacToeSpace x y gameId (ticTacToeGameNextPlayer game)
+          runDB $ update gameId [TicTacToeGameNextPlayer =. ticTacToeGameSuccPlayer game]
+          redirect (TicTacToeGameR gameId)
+        FormMissing -> renderTicTacToeGame gameE gameBoard boardWidget "Please select the space in which to move."
+        FormFailure errors -> renderTicTacToeGame gameE gameBoard boardWidget $ T.concat $ (T.pack "Your move had errors. Please correct: "):errors
+      Nothing -> renderTicTacToeGame gameE gameBoard boardWidget "Please log in to move."
+      _ -> renderTicTacToeGame gameE gameBoard boardWidget "It's not your turn!"
+
 getTicTacToeGameR :: TicTacToeGameId -> Handler Html
 getTicTacToeGameR gameId = do
     game <- runDB $ get404 gameId
     gameBoard <- runDB $ board gameId
-    maybePlayer1 <- runDB $ get (ticTacToeGamePlayer1 game)
-    maybePlayer2 <- runDB $ get (ticTacToeGamePlayer2 game)
     let nextPlayerId = ticTacToeGameNextPlayerId game
     viewer <- maybeAuthId
     ((res, boardWidget), enctype) <- runFormPost $ renderDivs $ areq (boardField gameBoard) "Make a move!" Nothing
-    defaultLayout $ do
-        titleForGameId gameId
-        $(widgetFile "tictactoe/detail")
+    renderTicTacToeGame (Entity gameId game) gameBoard boardWidget ""

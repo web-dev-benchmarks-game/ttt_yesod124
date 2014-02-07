@@ -9,6 +9,9 @@
   \ to play)
 
 <div .board>
+  $if not $ T.null message
+    <div .alert .warning>
+      #{message}
   $if Just nextPlayerId == viewer
     <form method="post" action=@{TicTacToeGameR gameId}>
       ^{boardWidget}

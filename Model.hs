@@ -33,5 +33,12 @@ getPlayerForSide :: Player -> TicTacToeGame -> UserId
 getPlayerForSide PlayerX = ticTacToeGamePlayer1
 getPlayerForSide PlayerO = ticTacToeGamePlayer2
 
+-- Player to take the move after this current move
+ticTacToeGameSuccPlayer :: TicTacToeGame -> Player
+ticTacToeGameSuccPlayer game = otherPlayer (ticTacToeGameNextPlayer game)
+otherPlayer :: Player -> Player
+otherPlayer PlayerX = PlayerO
+otherPlayer PlayerO = PlayerX
+
 ticTacToeGameNextPlayerId :: TicTacToeGame -> Key User
 ticTacToeGameNextPlayerId game = getPlayerForSide (ticTacToeGameNextPlayer game) game
